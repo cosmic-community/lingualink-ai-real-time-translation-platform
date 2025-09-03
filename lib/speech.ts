@@ -84,6 +84,9 @@ export class SpeechSynthesis {
     
     if (this.isSupported) {
       this.synth = window.speechSynthesis;
+    } else {
+      // Create a fallback object to prevent undefined errors
+      this.synth = {} as SpeechSynthesis;
     }
   }
 
@@ -109,14 +112,14 @@ export class SpeechSynthesis {
       utterance.volume = settings.volume;
 
       utterance.onend = () => resolve();
-      utterance.onerror = (event) => reject(new Error(event.error));
+      utterance.onerror = (event) => reject(new Error(`Speech synthesis error: ${event.error || 'Unknown error'}`));
 
       this.synth.speak(utterance);
     });
   }
 
   stop() {
-    if (this.isSupported) {
+    if (this.isSupported && this.synth) {
       this.synth.cancel();
     }
   }

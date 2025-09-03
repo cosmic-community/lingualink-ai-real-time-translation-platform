@@ -146,9 +146,9 @@ export default function TranslationHistory({
                 {formatDate(translation.created_at)}
               </div>
               
-              {translation.metadata.confidence_score > 0 && (
+              {translation.metadata.confidence_score && translation.metadata.confidence_score > 0 && (
                 <div className="text-xs text-muted-foreground">
-                  Confidence: {Math.round(translation.metadata.confidence_score * 100)}%
+                  Confidence: {Math.round((translation.metadata.confidence_score ?? 0) * 100)}%
                 </div>
               )}
             </div>
