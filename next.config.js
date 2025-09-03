@@ -9,9 +9,7 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['openai'],
-  },
+  serverExternalPackages: ['openai'],
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },

@@ -1,9 +1,18 @@
 import OpenAI from 'openai';
 import type { TranslationResponse } from '@/types';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time issues
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is required');
+  }
+  
+  return new OpenAI({
+    apiKey,
+  });
+}
 
 // Translate text using OpenAI
 export async function translateText(
@@ -12,6 +21,8 @@ export async function translateText(
   targetLanguage: string
 ): Promise<TranslationResponse> {
   try {
+    const openai = getOpenAIClient();
+    
     const prompt = `Translate the following text from ${sourceLanguage} to ${targetLanguage}. 
     Provide only the translation, maintaining the original tone and context:
 
@@ -42,6 +53,8 @@ export async function translateText(
 // Detect language of given text
 export async function detectLanguage(text: string): Promise<string> {
   try {
+    const openai = getOpenAIClient();
+    
     const prompt = `Detect the language of the following text and respond with only the language name in English:
 
     "${text}"`;
@@ -68,6 +81,8 @@ export async function translateWithContext(
   context?: string
 ): Promise<TranslationResponse> {
   try {
+    const openai = getOpenAIClient();
+    
     let prompt = `Translate the following text from ${sourceLanguage} to ${targetLanguage}. `;
     
     if (context) {
