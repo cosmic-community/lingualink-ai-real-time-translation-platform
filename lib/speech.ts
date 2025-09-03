@@ -80,17 +80,12 @@ export class SpeechRecognition {
 }
 
 export class SpeechSynthesis {
-  private synth: SpeechSynthesis | null;
+  private synth: globalThis.SpeechSynthesis | null;
   private isSupported: boolean;
 
   constructor() {
     this.isSupported = 'speechSynthesis' in window;
-    
-    if (this.isSupported) {
-      this.synth = window.speechSynthesis;
-    } else {
-      this.synth = null;
-    }
+    this.synth = this.isSupported ? window.speechSynthesis : null;
   }
 
   isSupported_(): boolean {
@@ -98,12 +93,12 @@ export class SpeechSynthesis {
   }
 
   stop(): void {
-    if (this.isSupported && this.synth) {
+    if (this.synth) {
       this.synth.cancel();
     }
   }
 
-  getLanguageCode(language?: string): string {
+  getLanguageCode(language: string = 'English'): string {
     const languageCodes: Record<string, string> = {
       'English': 'en-US',
       'Spanish': 'es-ES',
@@ -119,7 +114,7 @@ export class SpeechSynthesis {
       'Hindi': 'hi-IN'
     };
     
-    return languageCodes[language || 'English'] || 'en-US';
+    return languageCodes[language] || 'en-US';
   }
 
   speak(
