@@ -8,6 +8,7 @@ import { saveTranslation } from '@/lib/cosmic';
 import { SpeechRecognition, SpeechSynthesis, getSpeechSupport } from '@/lib/speech';
 import { validateTranslationInput, copyToClipboard, debounce } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
+import type { Language } from '@/types';
 
 interface TranslationInterfaceProps {
   languages: Language[];
@@ -344,7 +345,7 @@ export default function TranslationInterface({
         <div className="translation-card">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">Alternative translations:</h3>
           <div className="space-y-2">
-            {alternatives.map((alt, index) => (
+            {alternatives.map((alt: string, index: number) => (
               <button
                 key={index}
                 onClick={() => setTranslatedText(alt)}

@@ -1,4 +1,13 @@
 import { createBucketClient } from '@cosmicjs/sdk'
+import type { 
+  Language, 
+  Translation, 
+  UserProfile, 
+  ConversationSession, 
+  VoiceSettings, 
+  Theme, 
+  TranslationMethod 
+} from '@/types';
 
 export const cosmic = createBucketClient({
   bucketSlug: process.env.COSMIC_BUCKET_SLUG as string,

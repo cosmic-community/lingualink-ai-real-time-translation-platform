@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import type { TranslationResponse } from '@/types';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -99,7 +100,7 @@ export async function translateWithContext(
 
     const alternatives = alternativesCompletion.choices[0]?.message?.content?.trim()
       .split('\n')
-      .filter(alt => alt.trim().length > 0) || [];
+      .filter((alt: string) => alt.trim().length > 0) || [];
 
     return {
       translatedText,
@@ -122,7 +123,7 @@ export async function batchTranslate(
 ): Promise<string[]> {
   try {
     const translations = await Promise.all(
-      texts.map(text => translateText(text, sourceLanguage, targetLanguage))
+      texts.map((t: string) => translateText(t, sourceLanguage, targetLanguage))
     );
     
     return translations.map(t => t.translatedText);

@@ -8,6 +8,7 @@ import ConversationMode from '@/components/ConversationMode';
 import QuickAccess from '@/components/QuickAccess';
 import { getLanguages, getTranslationHistory } from '@/lib/cosmic';
 import { getSpeechSupport } from '@/lib/speech';
+import type { Language, Translation } from '@/types';
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'translate' | 'conversation' | 'history'>('translate');

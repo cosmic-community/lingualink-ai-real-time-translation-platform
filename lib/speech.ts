@@ -1,3 +1,5 @@
+import type { VoiceSettings } from '@/types';
+
 // Speech recognition and synthesis utilities
 
 export class SpeechRecognition {

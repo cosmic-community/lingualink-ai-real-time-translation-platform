@@ -3,6 +3,7 @@
 import { ChevronDown } from 'lucide-react';
 import { getLanguageFlag } from '@/lib/utils';
 import { useState, useRef, useEffect } from 'react';
+import type { Language } from '@/types';
 
 interface LanguageSelectorProps {
   languages: Language[];
@@ -26,7 +27,7 @@ export default function LanguageSelector({
 
   const selectedLanguage = languages.find(lang => lang.title === value);
   
-  const filteredLanguages = languages.filter(lang =>
+  const filteredLanguages = languages.filter((lang: Language) =>
     lang.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -91,7 +92,7 @@ export default function LanguageSelector({
           
           <div className="max-h-48 overflow-y-auto custom-scrollbar">
             {filteredLanguages.length > 0 ? (
-              filteredLanguages.map((language) => (
+              filteredLanguages.map((language: Language) => (
                 <button
                   key={language.id}
                   onClick={() => handleLanguageSelect(language)}

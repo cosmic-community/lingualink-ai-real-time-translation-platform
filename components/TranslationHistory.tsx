@@ -6,6 +6,7 @@ import { formatDate, copyToClipboard, getLanguageFlag } from '@/lib/utils';
 import { deleteTranslation } from '@/lib/cosmic';
 import { SpeechSynthesis, getSpeechSupport } from '@/lib/speech';
 import { toast } from 'react-hot-toast';
+import type { Translation } from '@/types';
 
 interface TranslationHistoryProps {
   translations: Translation[];
@@ -74,7 +75,7 @@ export default function TranslationHistory({
       <h2 className="text-xl font-bold text-foreground mb-4">Translation History</h2>
       
       <div className="space-y-3">
-        {translations.map((translation) => (
+        {translations.map((translation: Translation) => (
           <div key={translation.id} className="history-item">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">

@@ -8,6 +8,7 @@ import { SpeechRecognition, SpeechSynthesis, getSpeechSupport } from '@/lib/spee
 import { getLanguageFlag, generateSessionId, formatDate } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 import LanguageSelector from './LanguageSelector';
+import type { Language } from '@/types';
 
 interface ConversationModeProps {
   languages: Language[];
