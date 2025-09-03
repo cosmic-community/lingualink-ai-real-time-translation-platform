@@ -148,7 +148,11 @@ export class SpeechSynthesis {
     
     if (language) {
       const langCode = this.getLanguageCode(language);
-      return voices.filter(voice => voice.lang.startsWith(langCode.split('-')[0]));
+      // Add null check for langCode.split() to handle potential undefined
+      const langPrefix = langCode?.split('-')[0];
+      if (langPrefix) {
+        return voices.filter(voice => voice.lang.startsWith(langPrefix));
+      }
     }
     
     return voices;
