@@ -168,3 +168,29 @@ function isUserProfile(obj: CosmicObject): obj is UserProfile {
 type SupportedLanguage = string;
 type TranslationMethod = 'text' | 'voice' | 'document';
 type Theme = 'light' | 'dark' | 'system';
+
+// Export all types for use across the application
+export type {
+  CosmicObject,
+  Language,
+  Translation,
+  UserProfile,
+  ConversationSession,
+  DocumentTranslation,
+  CosmicResponse,
+  TranslationRequest,
+  TranslationResponse,
+  VoiceSettings,
+  TranslatorProps,
+  LanguageSelectorProps,
+  TranslationHistoryProps,
+  SupportedLanguage,
+  TranslationMethod,
+  Theme
+};
+
+export {
+  isLanguage,
+  isTranslation,
+  isUserProfile
+};

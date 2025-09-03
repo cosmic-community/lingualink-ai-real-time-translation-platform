@@ -15,6 +15,8 @@ export class SpeechRecognition {
   }
 
   private setupRecognition() {
+    if (!this.recognition) return;
+    
     this.recognition.continuous = false;
     this.recognition.interimResults = true;
     this.recognition.maxAlternatives = 1;
@@ -29,7 +31,7 @@ export class SpeechRecognition {
     onResult: (transcript: string, isFinal: boolean) => void,
     onError: (error: string) => void
   ) {
-    if (!this.isSupported) {
+    if (!this.isSupported || !this.recognition) {
       onError('Speech recognition not supported');
       return;
     }
@@ -76,7 +78,7 @@ export class SpeechRecognition {
 }
 
 export class SpeechSynthesis {
-  private synth: SpeechSynthesis;
+  private synth: SpeechSynthesis | null;
   private isSupported: boolean;
 
   constructor() {
@@ -85,13 +87,37 @@ export class SpeechSynthesis {
     if (this.isSupported) {
       this.synth = window.speechSynthesis;
     } else {
-      // Create a fallback object to prevent undefined errors
-      this.synth = {} as SpeechSynthesis;
+      this.synth = null;
     }
   }
 
   isSupported_(): boolean {
     return this.isSupported;
+  }
+
+  stop(): void {
+    if (this.isSupported && this.synth) {
+      this.synth.cancel();
+    }
+  }
+
+  getLanguageCode(language?: string): string {
+    const languageCodes: Record<string, string> = {
+      'English': 'en-US',
+      'Spanish': 'es-ES',
+      'French': 'fr-FR',
+      'German': 'de-DE',
+      'Italian': 'it-IT',
+      'Portuguese': 'pt-BR',
+      'Russian': 'ru-RU',
+      'Chinese': 'zh-CN',
+      'Japanese': 'ja-JP',
+      'Korean': 'ko-KR',
+      'Arabic': 'ar-SA',
+      'Hindi': 'hi-IN'
+    };
+    
+    return languageCodes[language || 'English'] || 'en-US';
   }
 
   speak(
@@ -100,7 +126,7 @@ export class SpeechSynthesis {
     settings: VoiceSettings = { speed: 1, pitch: 1, volume: 1 }
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.isSupported) {
+      if (!this.isSupported || !this.synth) {
         reject(new Error('Speech synthesis not supported'));
         return;
       }
@@ -118,14 +144,8 @@ export class SpeechSynthesis {
     });
   }
 
-  stop() {
-    if (this.isSupported && this.synth) {
-      this.synth.cancel();
-    }
-  }
-
   getVoices(language?: string): SpeechSynthesisVoice[] {
-    if (!this.isSupported) return [];
+    if (!this.isSupported || !this.synth) return [];
 
     const voices = this.synth.getVoices();
     
@@ -135,25 +155,6 @@ export class SpeechSynthesis {
     }
     
     return voices;
-  }
-
-  private getLanguageCode(language: string): string {
-    const languageCodes: Record<string, string> = {
-      'English': 'en-US',
-      'Spanish': 'es-ES',
-      'French': 'fr-FR',
-      'German': 'de-DE',
-      'Italian': 'it-IT',
-      'Portuguese': 'pt-BR',
-      'Russian': 'ru-RU',
-      'Chinese': 'zh-CN',
-      'Japanese': 'ja-JP',
-      'Korean': 'ko-KR',
-      'Arabic': 'ar-SA',
-      'Hindi': 'hi-IN'
-    };
-    
-    return languageCodes[language] || 'en-US';
   }
 }
 
