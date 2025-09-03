@@ -1,42 +1,48 @@
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
+const { glob } = require('glob');
 
-const scriptTag = '<script src="/dashboard-console-capture.js"></script>';
-
-function injectConsoleCapture() {
-  // Find all HTML files in the build output
-  const htmlFiles = glob.sync('**/*.html', { 
-    cwd: path.join(process.cwd(), '.next'),
-    absolute: true 
-  });
-
-  console.log(`Found ${htmlFiles.length} HTML files to process`);
-
-  htmlFiles.forEach(file => {
-    try {
-      let content = fs.readFileSync(file, 'utf8');
-      
-      // Skip if script is already injected
-      if (content.includes('/dashboard-console-capture.js')) {
-        return;
-      }
-
-      // Try to inject before closing head tag, or before closing body tag as fallback
-      if (content.includes('</head>')) {
-        content = content.replace('</head>', `  ${scriptTag}\n</head>`);
-      } else if (content.includes('</body>')) {
-        content = content.replace('</body>', `  ${scriptTag}\n</body>`);
-      }
-
-      fs.writeFileSync(file, content);
-      console.log(`Injected console capture script into: ${path.relative(process.cwd(), file)}`);
-    } catch (error) {
-      console.error(`Error processing ${file}:`, error.message);
+async function injectConsoleCapture() {
+  try {
+    // Find all HTML files in the output directory
+    const htmlFiles = await glob('out/**/*.html', { cwd: process.cwd() });
+    
+    if (htmlFiles.length === 0) {
+      console.log('No HTML files found in out directory. Skipping console capture injection.');
+      return;
     }
-  });
 
-  console.log('Console capture script injection complete');
+    const scriptContent = fs.readFileSync(
+      path.join(process.cwd(), 'public', 'dashboard-console-capture.js'), 
+      'utf8'
+    );
+
+    let injectedCount = 0;
+
+    for (const file of htmlFiles) {
+      const filePath = path.join(process.cwd(), file);
+      let content = fs.readFileSync(filePath, 'utf8');
+
+      // Check if script is already injected
+      if (content.includes('dashboard-console-capture')) {
+        continue;
+      }
+
+      // Inject the script inline in the head section
+      const headEndIndex = content.indexOf('</head>');
+      if (headEndIndex !== -1) {
+        const scriptTag = `<script>${scriptContent}</script>\n`;
+        content = content.slice(0, headEndIndex) + scriptTag + content.slice(headEndIndex);
+        
+        fs.writeFileSync(filePath, content);
+        injectedCount++;
+      }
+    }
+
+    console.log(`Console capture script injected into ${injectedCount} HTML files.`);
+  } catch (error) {
+    console.error('Error injecting console capture script:', error);
+  }
 }
 
 injectConsoleCapture();

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Trash2, RotateCcw, Copy, Volume2 } from 'lucide-react';
-import { formatDate, copyToClipboard, getLanguageFlag } from '@/lib/utils';
 import { deleteTranslation } from '@/lib/cosmic';
+import { copyToClipboard, formatDate, getLanguageFlag } from '@/lib/utils';
 import { SpeechSynthesis, getSpeechSupport } from '@/lib/speech';
 import { toast } from 'react-hot-toast';
 import type { Translation } from '@/types';
@@ -14,22 +14,17 @@ interface TranslationHistoryProps {
   onReuse: (translation: Translation) => void;
 }
 
-export default function TranslationHistory({ 
-  translations, 
-  onDelete, 
-  onReuse 
-}: TranslationHistoryProps) {
+export default function TranslationHistory({ translations, onDelete, onReuse }: TranslationHistoryProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const speechSynthesis = new SpeechSynthesis();
   const speechSupport = getSpeechSupport();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (translation: Translation) => {
     if (!confirm('Are you sure you want to delete this translation?')) return;
-    
-    setIsDeleting(id);
+
+    setIsDeleting(translation.id);
     try {
-      await deleteTranslation(id);
-      onDelete(id);
+      await deleteTranslation(translation.id);
+      onDelete(translation.id);
       toast.success('Translation deleted');
     } catch (error) {
       toast.error('Failed to delete translation');
@@ -54,7 +49,8 @@ export default function TranslationHistory({
     }
 
     try {
-      await speechSynthesis.speak(text, language);
+      const speech = new SpeechSynthesis();
+      await speech.speak(text, language);
     } catch (error) {
       toast.error('Failed to speak text');
     }
@@ -63,39 +59,47 @@ export default function TranslationHistory({
   if (translations.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-4xl mb-4">📚</div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">No translations yet</h3>
-        <p className="text-muted-foreground">Your translation history will appear here</p>
+        <div className="max-w-sm mx-auto">
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <RotateCcw className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No translations yet</h3>
+          <p className="text-muted-foreground">
+            Your translation history will appear here as you use the translator.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold text-foreground mb-4">Translation History</h2>
-      
-      <div className="space-y-3">
-        {translations.map((translation: Translation) => (
+    <div className="max-w-4xl mx-auto p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-foreground">Translation History</h2>
+        <span className="text-sm text-muted-foreground">
+          {translations.length} translation{translations.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      <div className="space-y-4">
+        {translations.map((translation) => (
           <div key={translation.id} className="history-item">
             <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <span>{getLanguageFlag(translation.metadata.source_language)}</span>
-                  <span>{translation.metadata.source_language}</span>
-                  <span>→</span>
-                  <span>{getLanguageFlag(translation.metadata.target_language)}</span>
-                  <span>{translation.metadata.target_language}</span>
-                </div>
-                
-                <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full">
-                  {translation.metadata.translation_method}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {getLanguageFlag(translation.metadata.source_language)} {translation.metadata.source_language}
+                  →
+                  {getLanguageFlag(translation.metadata.target_language)} {translation.metadata.target_language}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {formatDate(translation.created_at)}
                 </span>
               </div>
-
+              
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleCopy(translation.metadata.translated_text)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                   title="Copy translation"
                 >
                   <Copy className="w-4 h-4" />
@@ -104,7 +108,7 @@ export default function TranslationHistory({
                 {speechSupport.synthesis && (
                   <button
                     onClick={() => handleSpeak(translation.metadata.translated_text, translation.metadata.target_language)}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                     title="Speak translation"
                   >
                     <Volume2 className="w-4 h-4" />
@@ -113,46 +117,42 @@ export default function TranslationHistory({
                 
                 <button
                   onClick={() => onReuse(translation)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                  title="Reuse translation"
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                  title="Use this translation"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
                 
                 <button
-                  onClick={() => handleDelete(translation.id)}
+                  onClick={() => handleDelete(translation)}
                   disabled={isDeleting === translation.id}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                  className="p-2 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                   title="Delete translation"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
-
-            <div className="space-y-2">
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Original:</p>
-                <p className="text-foreground">{translation.metadata.source_text}</p>
+                <span className="text-xs text-muted-foreground">Original</span>
+                <p className="text-sm text-foreground mt-1">{translation.metadata.source_text}</p>
               </div>
               
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Translation:</p>
-                <p className="text-foreground font-medium">{translation.metadata.translated_text}</p>
+                <span className="text-xs text-muted-foreground">Translation</span>
+                <p className="text-sm font-medium text-foreground mt-1">{translation.metadata.translated_text}</p>
               </div>
             </div>
-
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-              <div className="text-xs text-muted-foreground">
-                {formatDate(translation.created_at)}
+            
+            {translation.metadata.confidence_score && translation.metadata.confidence_score > 0 && (
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                <span className="text-xs text-muted-foreground">
+                  Confidence: {Math.round((translation.metadata.confidence_score || 0) * 100)}%
+                </span>
               </div>
-              
-              {translation.metadata.confidence_score && translation.metadata.confidence_score > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  Confidence: {Math.round((translation.metadata.confidence_score ?? 0) * 100)}%
-                </div>
-              )}
-            </div>
+            )}
           </div>
         ))}
       </div>

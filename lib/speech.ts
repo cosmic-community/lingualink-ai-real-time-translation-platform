@@ -7,7 +7,8 @@ export class SpeechRecognition {
   private isSupported: boolean;
 
   constructor() {
-    this.isSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+    this.isSupported = typeof window !== 'undefined' && 
+      ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
     
     if (this.isSupported) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
@@ -84,7 +85,7 @@ export class SpeechSynthesis {
   private isSupported: boolean;
 
   constructor() {
-    this.isSupported = 'speechSynthesis' in window;
+    this.isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
     this.synth = this.isSupported ? window.speechSynthesis : null;
   }
 
@@ -148,7 +149,6 @@ export class SpeechSynthesis {
     
     if (language) {
       const langCode = this.getLanguageCode(language);
-      // Fix: Properly handle the case where split might return undefined
       const langPrefix = langCode.split('-')[0];
       if (langPrefix) {
         return voices.filter(voice => voice.lang.startsWith(langPrefix));
@@ -161,6 +161,13 @@ export class SpeechSynthesis {
 
 // Utility function to check if speech features are supported
 export function getSpeechSupport() {
+  if (typeof window === 'undefined') {
+    return {
+      recognition: false,
+      synthesis: false
+    };
+  }
+  
   return {
     recognition: 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window,
     synthesis: 'speechSynthesis' in window
