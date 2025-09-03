@@ -47,7 +47,7 @@ export class SpeechRecognition {
     };
 
     this.recognition.onerror = (event: any) => {
-      onError(event.error);
+      onError(event.error || 'Unknown error');
     };
 
     this.recognition.start();
