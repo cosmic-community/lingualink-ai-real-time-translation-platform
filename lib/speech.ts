@@ -148,8 +148,8 @@ export class SpeechSynthesis {
     
     if (language) {
       const langCode = this.getLanguageCode(language);
-      // Add null check for langCode.split() to handle potential undefined
-      const langPrefix = langCode?.split('-')[0];
+      // Fix: Properly handle the case where split might return undefined
+      const langPrefix = langCode.split('-')[0];
       if (langPrefix) {
         return voices.filter(voice => voice.lang.startsWith(langPrefix));
       }
